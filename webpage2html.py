@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import os, sys, re, base64, urlparse, urllib2, urllib, datetime
+import os, sys, re, base64, urllib.parse, urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, datetime
 from bs4 import BeautifulSoup
 import lxml
 import requests
@@ -18,9 +18,9 @@ except:
 
 def log(s, color=None, on_color=None, attrs=None, new_line=True):
     if not color:
-        print >> sys.stderr, str(s),
+        print(str(s), end=' ', file=sys.stderr)
     else:
-        print >> sys.stderr, colored(str(s), color, on_color, attrs),
+        print(colored(str(s), color, on_color, attrs), end=' ', file=sys.stderr)
     if new_line:
         sys.stderr.write('\n')
     sys.stderr.flush()
@@ -30,9 +30,9 @@ def absurl(index, relpath=None, normpath=None):
     if normpath is None:
         normpath = lambda x:x
     if index.lower().startswith('http') or (relpath and relpath.startswith('http')):
-        new = urlparse.urlparse(urlparse.urljoin(index, relpath))
+        new = urllib.parse.urlparse(urllib.parse.urljoin(index, relpath))
         # netloc contains basic auth, so do not use domain
-        return urlparse.urlunsplit((new.scheme, new.netloc, normpath(new.path), new.query, ''))
+        return urllib.parse.urlunsplit((new.scheme, new.netloc, normpath(new.path), new.query, ''))
     else:
         if relpath:
             return normpath(os.path.join(os.path.dirname(index), relpath))
@@ -51,7 +51,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
             return '', None
         # urllib2 only accepts valid url, the following code is taken from urllib
         # http://svn.python.org/view/python/trunk/Lib/urllib.py?r1=71780&r2=71779&pathrev=71780
-        fullpath = urllib.quote(fullpath, safe="%/:=&?~#+!$,;'@()*[]")
+        fullpath = urllib.parse.quote(fullpath, safe="%/:=&?~#+!$,;'@()*[]")
         if usecache:
             if fullpath in webpage2html_cache:
                 if verbose: log('[ CACHE HIT ] - %s' % fullpath)
@@ -86,7 +86,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
                 ret = open(fullpath, 'rb').read()
                 if verbose: log('[ LOCAL ] found - %s' % fullpath)
                 return ret, None
-            except IOError, err:
+            except IOError as err:
                 if verbose: log('[ WARN ] file not found - %s %s' % (fullpath, str(err)), 'yellow')
                 return '', None
         else:
@@ -94,7 +94,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
                 ret = open(index, 'rb').read()
                 if verbose: log('[ LOCAL ] found - %s' % index)
                 return ret, None
-            except IOError, err:
+            except IOError as err:
                 if verbose: log('[ WARN ] file not found - %s %s' % (index, str(err)), 'yellow')
                 return '', None
     else:
@@ -104,7 +104,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
 
 def data_to_base64(index, src, verbose=True):
     # doc here: http://en.wikipedia.org/wiki/Data_URI_scheme
-    sp = urlparse.urlparse(src).path.lower()
+    sp = urllib.parse.urlparse(src).path.lower()
     if src.strip().startswith('data:'):
         return src
     if sp.endswith('.png'):
@@ -138,7 +138,7 @@ def data_to_base64(index, src, verbose=True):
     if extra_data and extra_data.get('content-type'):
         fmt = extra_data.get('content-type').replace(' ', '')
     if data:
-        return ('data:%s;base64,' % fmt) + base64.b64encode(data)
+        return ('data:%s;base64,' % fmt) + base64.b64encode(data).decode("ascii")
     else:
         return src
 
@@ -149,7 +149,7 @@ css_encoding_re = re.compile(r'''@charset\s+["']([-_a-zA-Z0-9]+)["']\;''', re.I)
 def handle_css_content(index, css, verbose=True):
     if not css:
         return css
-    if not isinstance(css, unicode):
+    if not isinstance(css, str):
         mo = css_encoding_re.search(css)
         if mo:
             try:
