@@ -1,7 +1,7 @@
 
 # Webpage2html: Python 3
 
-The is a Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below: even if this fork lags master by a few commits, it should be easy for someone else to get the latest master and re-convert!
+An attempt at a Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion _seemed_ to work, but it is not extensively tested. I began to run into issues with the converted version.
 
 ## Conversion Process
 
