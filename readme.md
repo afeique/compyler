@@ -1,5 +1,23 @@
 
-# Webpage2html
+# Webpage2html: Python 3
+
+The is a Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below: even if this fork lags master by a few commits, it should be easy for someone else to get the latest master and re-convert!
+
+## Conversion Process
+
+    $ 2to3 -w webpage2html.py
+
+On line 141, add `.decode("ascii")` to:
+
+    return ('data:%s;base64,' % fmt) + base64.b64encode(data)
+
+Resulting in:
+
+    return ('data:%s;base64,' % fmt) + base64.b64encode(data).decode("ascii")
+
+That's it!
+
+# Webpage2html: Original Documentation
 
 [![Build Status](https://travis-ci.org/zTrix/webpage2html.png)](https://travis-ci.org/zTrix/webpage2html)
 
