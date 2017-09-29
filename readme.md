@@ -15,6 +15,17 @@ See lines 141, 204, 222.
 
 Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"ascii"))`. See lines 221, 223.
 
+To ensure that htmlentities are not incorrectly encoded and lost, change line 322 from
+
+    sys.stdout.write(rs)
+    
+to
+
+    sys.stdout.buffer.write(rs.encode("utf-8"))
+    
+See:
+https://stackoverflow.com/questions/3597480/how-to-make-python-3-print-utf8
+
 # Webpage2html: Original Documentation
 
 [![Build Status](https://travis-ci.org/zTrix/webpage2html.png)](https://travis-ci.org/zTrix/webpage2html)
