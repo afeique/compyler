@@ -150,6 +150,7 @@ def handle_css_content(index, css, verbose=True):
     if not css:
         return css
     if not isinstance(css, str):
+        css = css.decode("ascii")
         mo = css_encoding_re.search(css)
         if mo:
             try:
@@ -190,6 +191,9 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                 new_type = 'text/css' if not link.get('type') else link['type']
                 css = soup.new_tag('style', type=new_type)
                 css['data-href'] = link['href']
+                for attr in link.attrs:
+                    if attr in ['href']: continue
+                    css[attr] = link[attr]
                 css_data, _ = get(index, relpath=link['href'], verbose=verbose)
                 new_css_content = handle_css_content(absurl(index, link['href']), css_data, verbose=verbose)
                 # if "stylesheet/less" in '\n'.join(link.get('rel') or []).lower():    # fix browser side less: http://lesscss.org/#client-side-usage
@@ -197,7 +201,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                 #     link['data-href'] = link['href']
                 #     link['href'] = absurl(index, link['href'])
                 if False:  # new_css_content.find('@font-face') > -1 or new_css_content.find('@FONT-FACE') > -1:
-                    link['href'] = 'data:text/css;base64,' + base64.b64encode(new_css_content)
+                    link['href'] = 'data:text/css;base64,' + base64.b64encode(new_css_content).decode("ascii")
                 else:
                     css.string = new_css_content
                     link.replace_with(css)
@@ -214,10 +218,10 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         code['data-src'] = js['src']
         try:
             js_str, _ = get(index, relpath=js['src'], verbose=verbose)
-            if js_str.find('</script>') > -1:
-                code['src'] = 'data:text/javascript;base64,' + base64.b64encode(js_str)
-            elif js_str.find(']]>') < 0:
-                code.string = '<!--//--><![CDATA[//><!--\n' + js_str + '\n//--><!]]>'
+            if js_str.find(bytes('</script>',"ascii")) > -1:
+                code['src'] = 'data:text/javascript;base64,' + base64.b64encode(js_str).decode("ascii")
+            elif js_str.find(bytes(']]>',"ascii")) < 0:
+                code.string = '<!--//--><![CDATA[//><!--\n' + js_str.decode("ascii") + '\n//--><!]]>'
             else:
                 # replace ]]> does not work at all for chrome, do not believe
                 # http://en.wikipedia.org/wiki/CDATA
