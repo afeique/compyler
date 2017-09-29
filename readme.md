@@ -7,15 +7,13 @@ An attempt at a Python 3 conversion of [zTrix's webpage2html](https://github.com
 
     $ 2to3 -w webpage2html.py
 
-On line 141, add `.decode("ascii")` to:
+Search for lines utilizing `base64.b64encode()`. Append `.decode("ascii")` to these lines to get something like:
 
-    return ('data:%s;base64,' % fmt) + base64.b64encode(data)
+    `base64.b64encode(data).decode("ascii")`
 
-Resulting in:
+See lines 141, 204, 222.
 
-    return ('data:%s;base64,' % fmt) + base64.b64encode(data).decode("ascii")
-
-That's it!
+Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"ascii"))`. See lines 221, 223.
 
 # Webpage2html: Original Documentation
 
