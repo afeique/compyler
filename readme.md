@@ -19,9 +19,11 @@ Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"utf-8"))` on lines 2
 
 Replace `js_str` with `js_str.decode("utf-8")` on line 224.
 
-To ensure that htmlentities are not incorrectly encoded and lost, append `.encode("utf-8")` to the `return` of `compile()` on line 272:
+To ensure that htmlentities are not incorrectly encoded and lost, append `.encode("utf-8")` to the `return` of `compile()` on line 270 and line 272:
 
-    return str(soup).encode("utf-8")
+        return soup.prettify(formatter='html').encode("utf-8")
+    else:
+        return str(soup).encode("utf-8")
     
 And use a buffer on line 322:
 
