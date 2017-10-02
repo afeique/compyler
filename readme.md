@@ -15,7 +15,9 @@ Search for lines utilizing `base64.b64encode()`. Append `.decode("ascii")` to th
 
 See lines 141, 204, 222.
 
-Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"ascii"))`. See lines 221, 223.
+Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"utf-8"))` on lines 221, 223.
+
+Replace `js_str` with `js_str.decode("utf-8")` on line 224.
 
 To ensure that htmlentities are not incorrectly encoded and lost, change line 322 from
 
@@ -50,7 +52,7 @@ The `-s, --script` arg behavior on line 308 is inverted:
 
 Finally, change line 315, 316 to:
 
-    if args.script:
+    if args.scripts:
         kwargs['keep_scripts'] = False
 
 # Webpage2html: Original Documentation
