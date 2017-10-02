@@ -3,6 +3,7 @@
 
 import os, sys, re, base64, urllib.parse, urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, datetime
 from bs4 import BeautifulSoup
+from bs4.dammit import EntitySubstitution
 import lxml
 import requests
 import argparse
@@ -226,7 +227,7 @@ def compile(index, verbose=True, comment=True, keep_scripts=True, prettify=False
                 # replace ]]> does not work at all for chrome, do not believe
                 # http://en.wikipedia.org/wiki/CDATA
                 # code.string = '<![CDATA[\n' + js_str.replace(']]>', ']]]]><![CDATA[>') + '\n]]>'
-                code.string = js_str.encode('utf-8')
+                code.string = js_str.encode("utf-8")
         except:
             if verbose: log(repr(js_str))
             raise
@@ -263,13 +264,16 @@ def compile(index, verbose=True, comment=True, keep_scripts=True, prettify=False
     if comment:
         for html in soup('html'):
             html.insert(0, BeautifulSoup(
-                '<!-- \n single html processed by https://github.com/zTrix/webpage2html\n url: %s\n date: %s\n-->' % (
+                '<!-- \n single html processed by https://github.com/afeique/compyler\n url: %s\n date: %s\n-->' % (
                 index, datetime.datetime.now().ctime()), 'lxml'))
             break
+    # see: https://stackoverflow.com/questions/701704/convert-html-entities-to-unicode-and-vice-versa
     if prettify:
-        return soup.prettify(formatter='html')
+        text = soup.prettify(formatter='html')
     else:
-        return str(soup)
+        text = str(soup)
+    return text.encode("ascii", "xmlcharrefreplace")
+
 
 
 def usage():
@@ -319,7 +323,7 @@ def main():
     if args.errorpage:
         kwargs['errorpage'] = True
     rs = compile(args.url, **kwargs)
-    sys.stdout.buffer.write(rs.encode("utf-8"))
+    sys.stdout.buffer.write(rs)
 
 if __name__ == '__main__':
     main()
