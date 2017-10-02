@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os, sys, re, base64, urlparse, urllib2, urllib, datetime
+import os, sys, re, base64, urllib.parse, urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, datetime
 from bs4 import BeautifulSoup
 import lxml
 import requests
@@ -18,9 +18,9 @@ except:
 
 def log(s, color=None, on_color=None, attrs=None, new_line=True):
     if not color:
-        print >> sys.stderr, str(s),
+        print(str(s), end=' ', file=sys.stderr)
     else:
-        print >> sys.stderr, colored(str(s), color, on_color, attrs),
+        print(colored(str(s), color, on_color, attrs), end=' ', file=sys.stderr)
     if new_line:
         sys.stderr.write('\n')
     sys.stderr.flush()
@@ -30,9 +30,9 @@ def absurl(index, relpath=None, normpath=None):
     if normpath is None:
         normpath = lambda x:x
     if index.lower().startswith('http') or (relpath and relpath.startswith('http')):
-        new = urlparse.urlparse(urlparse.urljoin(index, relpath))
+        new = urllib.parse.urlparse(urllib.parse.urljoin(index, relpath))
         # netloc contains basic auth, so do not use domain
-        return urlparse.urlunsplit((new.scheme, new.netloc, normpath(new.path), new.query, ''))
+        return urllib.parse.urlunsplit((new.scheme, new.netloc, normpath(new.path), new.query, ''))
     else:
         if relpath:
             return normpath(os.path.join(os.path.dirname(index), relpath))
@@ -51,7 +51,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
             return '', None
         # urllib2 only accepts valid url, the following code is taken from urllib
         # http://svn.python.org/view/python/trunk/Lib/urllib.py?r1=71780&r2=71779&pathrev=71780
-        fullpath = urllib.quote(fullpath, safe="%/:=&?~#+!$,;'@()*[]")
+        fullpath = urllib.parse.quote(fullpath, safe="%/:=&?~#+!$,;'@()*[]")
         if usecache:
             if fullpath in webpage2html_cache:
                 if verbose: log('[ CACHE HIT ] - %s' % fullpath)
@@ -86,7 +86,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
                 ret = open(fullpath, 'rb').read()
                 if verbose: log('[ LOCAL ] found - %s' % fullpath)
                 return ret, None
-            except IOError, err:
+            except IOError as err:
                 if verbose: log('[ WARN ] file not found - %s %s' % (fullpath, str(err)), 'yellow')
                 return '', None
         else:
@@ -94,7 +94,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
                 ret = open(index, 'rb').read()
                 if verbose: log('[ LOCAL ] found - %s' % index)
                 return ret, None
-            except IOError, err:
+            except IOError as err:
                 if verbose: log('[ WARN ] file not found - %s %s' % (index, str(err)), 'yellow')
                 return '', None
     else:
@@ -104,7 +104,7 @@ def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_er
 
 def data_to_base64(index, src, verbose=True):
     # doc here: http://en.wikipedia.org/wiki/Data_URI_scheme
-    sp = urlparse.urlparse(src).path.lower()
+    sp = urllib.parse.urlparse(src).path.lower()
     if src.strip().startswith('data:'):
         return src
     if sp.endswith('.png'):
@@ -138,7 +138,7 @@ def data_to_base64(index, src, verbose=True):
     if extra_data and extra_data.get('content-type'):
         fmt = extra_data.get('content-type').replace(' ', '')
     if data:
-        return ('data:%s;base64,' % fmt) + base64.b64encode(data)
+        return ('data:%s;base64,' % fmt) + base64.b64encode(data).decode("ascii")
     else:
         return src
 
@@ -149,7 +149,8 @@ css_encoding_re = re.compile(r'''@charset\s+["']([-_a-zA-Z0-9]+)["']\;''', re.I)
 def handle_css_content(index, css, verbose=True):
     if not css:
         return css
-    if not isinstance(css, unicode):
+    if not isinstance(css, str):
+        css = css.decode("ascii")
         mo = css_encoding_re.search(css)
         if mo:
             try:
@@ -172,7 +173,7 @@ def handle_css_content(index, css, verbose=True):
     return css
 
 
-def generate(index, verbose=True, comment=True, keep_script=False, prettify=False, full_url=True, verify=True, errorpage=False):
+def compile(index, verbose=True, comment=True, keep_scripts=True, prettify=False, full_url=True, verify=True, errorpage=False):
     '''
     given a index url such as http://www.google.com, http://custom.domain/index.html
     return generated single html
@@ -200,7 +201,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                 #     link['data-href'] = link['href']
                 #     link['href'] = absurl(index, link['href'])
                 if False:  # new_css_content.find('@font-face') > -1 or new_css_content.find('@FONT-FACE') > -1:
-                    link['href'] = 'data:text/css;base64,' + base64.b64encode(new_css_content)
+                    link['href'] = 'data:text/css;base64,' + base64.b64encode(new_css_content).decode("ascii")
                 else:
                     css.string = new_css_content
                     link.replace_with(css)
@@ -208,7 +209,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                 link['data-href'] = link['href']
                 link['href'] = absurl(index, link['href'])
     for js in soup('script'):
-        if not keep_script:
+        if not keep_scripts:
             js.replace_with('')
             continue
         if not js.get('src'): continue
@@ -217,10 +218,10 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         code['data-src'] = js['src']
         try:
             js_str, _ = get(index, relpath=js['src'], verbose=verbose)
-            if js_str.find('</script>') > -1:
-                code['src'] = 'data:text/javascript;base64,' + base64.b64encode(js_str)
-            elif js_str.find(']]>') < 0:
-                code.string = '<!--//--><![CDATA[//><!--\n' + js_str + '\n//--><!]]>'
+            if js_str.find(bytes('</script>',"utf-8")) > -1:
+                code['src'] = 'data:text/javascript;base64,' + base64.b64encode(js_str).decode("ascii")
+            elif js_str.find(bytes(']]>',"utf-8")) < 0:
+                code.string = '<!--//--><![CDATA[//><!--\n' + js_str.decode("utf-8") + '\n//--><!]]>'
             else:
                 # replace ]]> does not work at all for chrome, do not believe
                 # http://en.wikipedia.org/wiki/CDATA
@@ -304,21 +305,21 @@ def main():
     kwargs = {}
     parser = argparse.ArgumentParser()
     parser.add_argument('-q', '--quite', action='store_true', help="don't show verbose url get log in stderr")
-    parser.add_argument('-s', '--script', action='store_true', help="keep javascript in the generated html ")
+    parser.add_argument('-s', '--scripts', action='store_true', help="don't embed JavaScript in the generated html ")
     parser.add_argument('-k', '--insecure', action='store_true', help="ignore the certificate")
     parser.add_argument('--errorpage', action='store_true', help="crawl an error page")
     parser.add_argument("url", help="the website to store")
     args = parser.parse_args()
     if args.quite:
         kwargs['verbose'] = False
-    if args.script:
-        kwargs['keep_script'] = True
+    if args.scripts:
+        kwargs['keep_scripts'] = False
     if args.insecure:
         kwargs['verify'] = False
     if args.errorpage:
         kwargs['errorpage'] = True
-    rs = generate(args.url, **kwargs)
-    sys.stdout.write(rs)
+    rs = compile(args.url, **kwargs)
+    sys.stdout.buffer.write(rs.encode("utf-8"))
 
 if __name__ == '__main__':
     main()
