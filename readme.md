@@ -1,7 +1,7 @@
 
 # Webpage2html: Python 3
 
-An attempt at a Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion _seemed_ to work, but it is not extensively tested. I began to run into issues with the converted version.
+A Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion _seems_ to work and functions for my needs (compiling [Slate](https://github.com/lord/slate) builds for distribution).
 
 ## Conversion Process
 
