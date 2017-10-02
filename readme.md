@@ -32,6 +32,8 @@ To ensure that htmlentities are not incorrectly encoded and lost, modify the `re
     else:
         text = str(soup)
     return text.encode("ascii", "xmlcharrefreplace")
+    
+This causes `compile()` to return a _`bytes`_ object, which should be written to a file or `stdout` using [Buffered I/O](https://docs.python.org/3/library/io.html#binary-i-o).
 
 ## Additional Changes
 
