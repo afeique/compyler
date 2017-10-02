@@ -19,13 +19,13 @@ Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"utf-8"))` on lines 2
 
 Replace `js_str` with `js_str.decode("utf-8")` on line 224.
 
-To ensure that htmlentities are not incorrectly encoded and lost, change line 322 from
+To ensure that htmlentities are not incorrectly encoded and lost, append `.encode("utf-8")` to the `return` of `compile()` on line 272:
 
-    sys.stdout.write(rs)
+    return str(soup).encode("utf-8")
     
-to
+And use a buffer on line 322:
 
-    sys.stdout.buffer.write(rs.encode("utf-8"))
+    sys.stdout.buffer.write(rs)
     
 See:
 https://stackoverflow.com/questions/3597480/how-to-make-python-3-print-utf8
