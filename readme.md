@@ -36,17 +36,22 @@ Function prototype of `generate` changed from:
 
 To:
 
-    def compile(index, verbose=True, comment=True, keep_script=True, prettify=False, full_url=True, verify=True, errorpage=False):
+    def compile(index, verbose=True, comment=True, keep_scripts=True, prettify=False, full_url=True, verify=True, errorpage=False):
    
-`keep_script=True` ensures that JavaScript is saved by default. See line 176.
+`keep_scripts=True` ensures that JavaScript is saved by default. See line 176.
 
 Line 321 is changed to use the updated prototype:
 
     rs = compile(args.url, **kwargs)
     
-Finally, the `-s, --script` arg behavior on line 308 is inverted:
+The `-s, --script` arg behavior on line 308 is inverted:
 
-    parser.add_argument('-s', '--script', action='store_true', help="don't embed JavaScript in the generated html ")
+    parser.add_argument('-s', '--scripts', action='store_true', help="don't embed JavaScript in the generated html ")
+
+Finally, change line 315, 316 to:
+
+    if args.script:
+        kwargs['keep_scripts'] = False
 
 # Webpage2html: Original Documentation
 
