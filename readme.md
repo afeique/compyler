@@ -18,19 +18,20 @@ See lines 141, 204, 222.
 Replace `js_str.find(<str>)` with `js_str.find(bytes(<str>,"utf-8"))` on lines 221, 223.
 
 Replace `js_str` with `js_str.decode("utf-8")` on line 224.
-
-To ensure that htmlentities are not incorrectly encoded and lost, append `.encode("utf-8")` to the `return` of `compile()` on line 270 and line 272:
-
-        return soup.prettify(formatter='html').encode("utf-8")
-    else:
-        return str(soup).encode("utf-8")
     
-And use a buffer on line 322:
+Use a buffer on line 322:
 
+    # see: https://stackoverflow.com/questions/3597480/how-to-make-python-3-print-utf8
     sys.stdout.buffer.write(rs)
     
-See:
-https://stackoverflow.com/questions/3597480/how-to-make-python-3-print-utf8
+To ensure that htmlentities are not incorrectly encoded and lost, modify the `return` of `compile()` starting on line 270:
+
+    # see: https://stackoverflow.com/questions/701704/convert-html-entities-to-unicode-and-vice-versa
+    if prettify:
+        text = soup.prettify(formatter='html')
+    else:
+        text = str(soup)
+    return text.encode("ascii", "xmlcharrefreplace")
 
 ## Additional Changes
 
