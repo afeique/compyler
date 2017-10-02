@@ -1,5 +1,5 @@
 
-# Webpage2html: Python 3
+# Compyler (Python 3)
 
 A Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion works and functions for compiling [Slate](https://github.com/lord/slate) builds for distribution. 
 
