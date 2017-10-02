@@ -1,7 +1,7 @@
 
 # Webpage2html: Python 3
 
-A Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion _seems_ to work and functions for my needs (compiling [Slate](https://github.com/lord/slate) builds for distribution).
+A Python 3 conversion of [zTrix's webpage2html](https://github.com/zTrix/webpage2html). Instructions on performing the port are provided below. This conversion works and functions for compiling [Slate](https://github.com/lord/slate) builds for distribution. 
 
 ## Conversion Process
 
@@ -25,6 +25,26 @@ to
     
 See:
 https://stackoverflow.com/questions/3597480/how-to-make-python-3-print-utf8
+
+## Additional Changes
+
+Function prototype of `generate` changed from:
+
+    def generate(index, verbose=True, comment=True, keep_script=False, prettify=False, full_url=True, verify=True, errorpage=False):
+
+To:
+
+    def compile(index, verbose=True, comment=True, keep_script=True, prettify=False, full_url=True, verify=True, errorpage=False):
+   
+`keep_script=True` ensures that JavaScript is saved by default. See line 176.
+
+Line 321 is changed to use the updated prototype:
+
+    rs = compile(args.url, **kwargs)
+    
+Finally, the `-s, --script` arg behavior on line 308 is inverted:
+
+    parser.add_argument('-s', '--script', action='store_true', help="don't embed JavaScript in the generated html ")
 
 # Webpage2html: Original Documentation
 
